@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -26,6 +27,16 @@ public class SlideListener implements Listener {
     public SlideListener(ImageStickPlugin plugin, SlideGroupManager groupManager) {
         this.plugin = plugin;
         this.groupManager = groupManager;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFrameBreak(@NotNull HangingBreakEvent event) {
+        if (!(event.getEntity() instanceof ItemFrame frame)) return;
+
+        SlideGroup removed = groupManager.unregisterByFrame(frame.getUniqueId());
+        if (removed == null) return;
+
+        plugin.getLogger().info("Slide group '" + removed.getDirectory() + "' unregistered because one of its item frames was broken.");
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
