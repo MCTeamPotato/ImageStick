@@ -9,10 +9,6 @@ http-port: 8765
 # Leave as "auto" to attempt automatic detection (may not work behind NAT).
 server-ip: "auto"
 
-# Delay (in ticks) between each /imageframe create command dispatch.
-# 20 ticks = 1 second. Increase if ImageFrame needs more time between imports.
-command-delay-ticks: 5
-
 # Whether slide groups loop around at the ends.
 # true  → after the last slide, right-clicking wraps back to slide 1
 #          (and Shift+click on slide 1 wraps to the last slide)

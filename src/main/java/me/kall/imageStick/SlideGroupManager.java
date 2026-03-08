@@ -26,6 +26,16 @@ public class SlideGroupManager {
     }
 
     public void register(SlideGroup group) {
+        groups.removeIf(existing -> {
+            if (existing.getDirectory().equalsIgnoreCase(group.getDirectory())) {
+                for (UUID uuid : existing.getFrameUUIDs()) {
+                    frameIndex.remove(uuid);
+                }
+                return true;
+            }
+            return false;
+        });
+
         groups.add(group);
         for (UUID uuid : group.getFrameUUIDs()) {
             frameIndex.put(uuid, group);
