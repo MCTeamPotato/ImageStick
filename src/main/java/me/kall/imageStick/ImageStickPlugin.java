@@ -8,8 +8,9 @@ import java.net.InetAddress;
 import java.util.logging.Level;
 
 public class ImageStickPlugin extends JavaPlugin {
-    private ImageHttpServer httpServer;
-    private String resolvedIp;
+    private ImageHttpServer   httpServer;
+    private SlideGroupManager slideGroupManager;
+    private String            resolvedIp;
 
     @Override
     public void onEnable() {
@@ -40,17 +41,23 @@ public class ImageStickPlugin extends JavaPlugin {
         try {
             httpServer.start();
             getLogger().info("ImageStick HTTP server started on port " + port);
-            getLogger().info("Images will be served from: " + imagesRoot.getAbsolutePath());
+            getLogger().info("Images served from: " + imagesRoot.getAbsolutePath());
             getLogger().info("Base URL: http://" + resolvedIp + ":" + port + "/");
         } catch (IOException e) {
-            getLogger().log(Level.SEVERE, "Failed to start HTTP server on port " + port + ": " + e.getMessage(), e);
+            getLogger().log(Level.SEVERE,
+                    "Failed to start HTTP server on port " + port + ": " + e.getMessage(), e);
         }
 
-        ImageStickCommand commandExecutor = new ImageStickCommand(this);
+        slideGroupManager = new SlideGroupManager(this);
+
+        ImageStickCommand commandExecutor = new ImageStickCommand(this, slideGroupManager);
         //noinspection DataFlowIssue
         getCommand("imagestick").setExecutor(commandExecutor);
         //noinspection DataFlowIssue
         getCommand("imagestick").setTabCompleter(commandExecutor);
+
+        getServer().getPluginManager().registerEvents(
+                new SlideListener(this, slideGroupManager), this);
 
         getLogger().info("ImageStick enabled. Place images under plugins/ImageStick/images/<directory>/");
     }
@@ -63,19 +70,15 @@ public class ImageStickPlugin extends JavaPlugin {
         }
     }
 
-    public String getResolvedIp() {
-        return resolvedIp;
-    }
-
-    public int getHttpPort() {
-        return getConfig().getInt("http-port", 8765);
-    }
-
-    public int getCommandDelayTicks() {
-        return getConfig().getInt("command-delay-ticks", 5);
-    }
+    public String getResolvedIp()       { return resolvedIp; }
+    public int    getHttpPort()         { return getConfig().getInt("http-port", 8765); }
+    public int    getCommandDelayTicks(){ return getConfig().getInt("command-delay-ticks", 5); }
 
     public File getImagesRoot() {
         return new File(getDataFolder(), "images");
+    }
+
+    public SlideGroupManager getSlideGroupManager() {
+        return slideGroupManager;
     }
 }
