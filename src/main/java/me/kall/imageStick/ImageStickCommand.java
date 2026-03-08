@@ -1,6 +1,7 @@
 package me.kall.imageStick;
 
 import com.loohp.imageframe.ImageFrame;
+import com.loohp.imageframe.api.events.ImageMapAddedEvent;
 import com.loohp.imageframe.objectholders.ItemFrameSelectionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -11,6 +12,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,19 +80,17 @@ public class ImageStickCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ChatColor.YELLOW + "Supported formats: png, jpg, jpeg, gif, webp");
             return;
         }
-        String baseUrl    = "http://" + plugin.getResolvedIp() + ":" + plugin.getHttpPort();
-        int    delayTicks = plugin.getCommandDelayTicks();
+        String baseUrl = "http://" + plugin.getResolvedIp() + ":" + plugin.getHttpPort();
         sender.sendMessage(ChatColor.GREEN + "Starting ImageFrame import for " + imageFiles.size() + " image(s) in '" + dirName + "'...");
         sender.sendMessage(ChatColor.GRAY + "Base URL: " + baseUrl + "/" + dirName + "/");
-        sender.sendMessage(ChatColor.GRAY + "Each command dispatched with " + delayTicks + " tick(s) delay.");
+        sender.sendMessage(ChatColor.GRAY + "Each image will be dispatched after the previous one finishes.");
         dispatchNext(sender, imageFiles, 0, dirName, baseUrl, width, height);
     }
 
     private void dispatchNext(CommandSender sender, @NotNull List<File> files, int index,
                               String dirName, String baseUrl, int width, int height) {
         if (index >= files.size()) {
-            sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD
-                    + "✔ All " + files.size() + " ImageFrame commands dispatched!");
+            sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "✔ All " + files.size() + " ImageFrame maps created!");
             return;
         }
         File   imgFile   = files.get(index);
@@ -96,17 +99,26 @@ public class ImageStickCommand implements CommandExecutor, TabCompleter {
         String url       = baseUrl + "/" + dirName + "/" + fileName;
         String cmd       = "imageframe create " + frameName + " " + url + " " + width + " " + height + " combined";
 
-        if (sender instanceof Player player) {
-            Bukkit.dispatchCommand(player, cmd);
-        } else {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "Must be run by a player.");
             return;
         }
-        sender.sendMessage(ChatColor.AQUA + "[" + (index + 1) + "/" + files.size() + "] "
-                + ChatColor.WHITE + "Dispatched: /" + cmd);
-        Bukkit.getScheduler().runTaskLater(plugin,
-                () -> dispatchNext(sender, files, index + 1, dirName, baseUrl, width, height),
-                plugin.getCommandDelayTicks());
+
+        Listener[] holder = new Listener[1];
+        holder[0] = new Listener() {
+            @EventHandler(priority = EventPriority.MONITOR)
+            public void onImageMapAdded(ImageMapAddedEvent event) {
+                if (!event.getImageMap().getName().equalsIgnoreCase(frameName)) return;
+                HandlerList.unregisterAll(holder[0]);
+                int next = index + 1;
+                sender.sendMessage(ChatColor.AQUA + "[" + next + "/" + files.size() + "] " + ChatColor.WHITE + frameName + ChatColor.GREEN + " ✔");
+                Bukkit.getScheduler().runTask(plugin, () -> dispatchNext(sender, files, next, dirName, baseUrl, width, height));
+            }
+        };
+        Bukkit.getPluginManager().registerEvents(holder[0], plugin);
+
+        sender.sendMessage(ChatColor.GRAY + "Creating: " + frameName + "...");
+        Bukkit.dispatchCommand(player, cmd);
     }
 
     private void handleBind(CommandSender sender, String[] args) {
@@ -128,7 +140,6 @@ public class ImageStickCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        // Verify the image directory exists and has images
         File imageDir = new File(plugin.getImagesRoot(), dirName);
         if (!imageDir.exists() || !imageDir.isDirectory()) {
             player.sendMessage(ChatColor.RED + "Directory not found: plugins/ImageStick/images/" + dirName);
