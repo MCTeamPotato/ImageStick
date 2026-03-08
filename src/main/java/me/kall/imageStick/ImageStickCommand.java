@@ -47,14 +47,14 @@ public class ImageStickCommand implements CommandExecutor, TabCompleter {
 
         switch (args[0].toLowerCase()) {
             case "import" -> handleImport(sender, args);
-            case "bind"   -> handleBind(sender, args);
+            case "bind" -> handleBind(sender, args);
             case "reload" -> handleReload(sender);
-            default       -> sendUsage(sender);
+            default -> sendUsage(sender);
         }
         return true;
     }
 
-    private void handleImport(CommandSender sender, @NotNull String[] args) {
+    private void handleImport(CommandSender sender, @NotNull String @NotNull [] args) {
         if (args.length < 4) {
             sender.sendMessage(ChatColor.YELLOW + "Usage: /imagestick import <directory> <width> <height>");
             return;
@@ -87,17 +87,16 @@ public class ImageStickCommand implements CommandExecutor, TabCompleter {
         dispatchNext(sender, imageFiles, 0, dirName, baseUrl, width, height);
     }
 
-    private void dispatchNext(CommandSender sender, @NotNull List<File> files, int index,
-                              String dirName, String baseUrl, int width, int height) {
+    private void dispatchNext(CommandSender sender, @NotNull List<File> files, int index, String dirName, String baseUrl, int width, int height) {
         if (index >= files.size()) {
             sender.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "✔ All " + files.size() + " ImageFrame maps created!");
             return;
         }
-        File   imgFile   = files.get(index);
+        File imgFile = files.get(index);
         String fileName  = imgFile.getName();
         String frameName = dirName + "_" + stripExtension(fileName);
-        String url       = baseUrl + "/" + dirName + "/" + fileName;
-        String cmd       = "imageframe create " + frameName + " " + url + " " + width + " " + height + " combined";
+        String url = baseUrl + "/" + dirName + "/" + fileName;
+        String cmd = "imageframe create " + frameName + " " + url + " " + width + " " + height + " combined";
 
         if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "Must be run by a player.");
@@ -221,10 +220,7 @@ public class ImageStickCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2 && isImportOrBind) {
             File[] dirs = plugin.getImagesRoot().listFiles(File::isDirectory);
             if (dirs == null) return Collections.emptyList();
-            return Arrays.stream(dirs)
-                    .map(File::getName)
-                    .filter(n -> n.startsWith(args[1]))
-                    .collect(Collectors.toList());
+            return Arrays.stream(dirs).map(File::getName).filter(n -> n.startsWith(args[1])).collect(Collectors.toList());
         }
 
         if (args.length == 3 && isImportOrBind) return List.of("1", "2", "4");
@@ -242,8 +238,8 @@ public class ImageStickCommand implements CommandExecutor, TabCompleter {
     }
 
     private static int extractTrailingNumber(@NotNull File f) {
-        String  name = stripExtension(f.getName());
-        Matcher m    = Pattern.compile("(\\d+)$").matcher(name);
+        String name = stripExtension(f.getName());
+        Matcher m  = Pattern.compile("(\\d+)$").matcher(name);
         return m.find() ? Integer.parseInt(m.group(1)) : Integer.MAX_VALUE;
     }
 

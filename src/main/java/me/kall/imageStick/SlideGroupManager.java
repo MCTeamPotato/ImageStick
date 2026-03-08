@@ -3,6 +3,7 @@ package me.kall.imageStick;
 import org.bukkit.Rotation;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +19,8 @@ public class SlideGroupManager {
 
     private final List<SlideGroup> groups = new ArrayList<>();
 
-    public SlideGroupManager(ImageStickPlugin plugin) {
-        this.plugin   = plugin;
+    public SlideGroupManager(@NotNull ImageStickPlugin plugin) {
+        this.plugin = plugin;
         this.dataFile = new File(plugin.getDataFolder(), "slides.yml");
         load();
     }
@@ -37,24 +38,24 @@ public class SlideGroupManager {
     }
 
     public void save() {
-        YamlConfiguration cfg = new YamlConfiguration();
+        YamlConfiguration config = new YamlConfiguration();
         for (int i = 0; i < groups.size(); i++) {
-            SlideGroup g   = groups.get(i);
-            String     key = "groups." + i;
+            SlideGroup slideGroup   = groups.get(i);
+            String  key = "groups." + i;
 
-            cfg.set(key + ".directory",    g.getDirectory());
-            cfg.set(key + ".width",        g.getWidth());
-            cfg.set(key + ".height",       g.getHeight());
-            cfg.set(key + ".rotation",     g.getRotation().name());
-            cfg.set(key + ".currentIndex", g.getCurrentIndex());
-            cfg.set(key + ".slideNames",   g.getSlideNames());
+            config.set(key + ".directory", slideGroup.getDirectory());
+            config.set(key + ".width", slideGroup.getWidth());
+            config.set(key + ".height", slideGroup.getHeight());
+            config.set(key + ".rotation", slideGroup.getRotation().name());
+            config.set(key + ".currentIndex", slideGroup.getCurrentIndex());
+            config.set(key + ".slideNames", slideGroup.getSlideNames());
 
             List<String> uuids = new ArrayList<>();
-            for (UUID uuid : g.getFrameUUIDs()) uuids.add(uuid.toString());
-            cfg.set(key + ".frameUUIDs", uuids);
+            for (UUID uuid : slideGroup.getFrameUUIDs()) uuids.add(uuid.toString());
+            config.set(key + ".frameUUIDs", uuids);
         }
         try {
-            cfg.save(dataFile);
+            config.save(dataFile);
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to save slides.yml", e);
         }
@@ -71,15 +72,15 @@ public class SlideGroupManager {
                 ConfigurationSection sec = root.getConfigurationSection(key);
                 if (sec == null) continue;
 
-                String   directory    = sec.getString("directory");
-                int      width        = sec.getInt("width");
-                int      height       = sec.getInt("height");
-                Rotation rotation     = Rotation.valueOf(sec.getString("rotation", "NONE"));
-                int      currentIndex = sec.getInt("currentIndex", 0);
+                String directory = sec.getString("directory");
+                int width = sec.getInt("width");
+                int height = sec.getInt("height");
+                Rotation rotation = Rotation.valueOf(sec.getString("rotation", "NONE"));
+                int currentIndex = sec.getInt("currentIndex", 0);
                 List<String> slideNames = sec.getStringList("slideNames");
 
-                List<String>  rawUUIDs = sec.getStringList("frameUUIDs");
-                List<UUID>    uuids    = new ArrayList<>();
+                List<String> rawUUIDs = sec.getStringList("frameUUIDs");
+                List<UUID> uuids = new ArrayList<>();
                 for (String s : rawUUIDs) uuids.add(UUID.fromString(s));
 
                 SlideGroup group = new SlideGroup(directory, width, height, uuids, rotation, slideNames, currentIndex);

@@ -16,25 +16,49 @@ public class SlideGroup {
     private int currentIndex;
 
     public SlideGroup(String directory, int width, int height, List<UUID> frameUUIDs, Rotation rotation, List<String> slideNames, int currentIndex) {
-        this.directory   = directory;
-        this.width       = width;
-        this.height      = height;
-        this.frameUUIDs  = frameUUIDs;
-        this.rotation    = rotation;
-        this.slideNames  = slideNames;
+        this.directory = directory;
+        this.width = width;
+        this.height = height;
+        this.frameUUIDs = frameUUIDs;
+        this.rotation = rotation;
+        this.slideNames = slideNames;
         this.currentIndex = currentIndex;
     }
 
-    public String getDirectory()       { return directory; }
-    public int    getWidth()           { return width; }
-    public int    getHeight()          { return height; }
-    public List<UUID> getFrameUUIDs()  { return frameUUIDs; }
-    public Rotation   getRotation()    { return rotation; }
-    public List<String> getSlideNames(){ return slideNames; }
-    public int    getCurrentIndex()    { return currentIndex; }
-    public int    getTotalSlides()     { return slideNames.size(); }
+    public String getDirectory() {
+        return directory;
+    }
 
-    public String currentSlideName()   { return slideNames.get(currentIndex); }
+    public int getWidth()  {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public List<UUID> getFrameUUIDs() {
+        return frameUUIDs;
+    }
+
+    public Rotation getRotation() {
+        return rotation;
+    }
+    public List<String> getSlideNames() {
+        return slideNames;
+    }
+
+    public int getCurrentIndex() {
+        return currentIndex;
+    }
+
+    public int getTotalSlides() {
+        return slideNames.size();
+    }
+
+    public String currentSlideName() {
+        return slideNames.get(currentIndex);
+    }
 
     public boolean step(int delta, boolean loop) {
         int next = currentIndex + delta;

@@ -24,7 +24,7 @@ public class SlideListener implements Listener {
     private final SlideGroupManager groupManager;
 
     public SlideListener(ImageStickPlugin plugin, SlideGroupManager groupManager) {
-        this.plugin       = plugin;
+        this.plugin = plugin;
         this.groupManager = groupManager;
     }
 
@@ -35,7 +35,7 @@ public class SlideListener implements Listener {
         Entity entity = event.getRightClicked();
         if (!(entity instanceof ItemFrame)) return;
 
-        Player    player = event.getPlayer();
+        Player player = event.getPlayer();
         ItemStack item   = player.getInventory().getItemInMainHand();
         if (item.getType() != Material.STICK) return;
 
@@ -83,7 +83,7 @@ public class SlideListener implements Listener {
         groupManager.save();
 
         int current = group.getCurrentIndex() + 1;
-        int total   = group.getTotalSlides();
+        int total = group.getTotalSlides();
         player.sendMessage(ChatColor.GREEN + "Slide " + current + " / " + total + ChatColor.GRAY + "  [" + targetName + "]");
     }
 
