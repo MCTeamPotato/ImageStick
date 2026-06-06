@@ -54,7 +54,6 @@ public class SlideListener implements Listener {
         if (group == null) return;
 
         event.setCancelled(true);
-        player.updateInventory();
 
         int delta = player.isSneaking() ? -1 : 1;
         boolean loop = plugin.getConfig().getBoolean("slide-loop", false);
